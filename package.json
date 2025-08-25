@@ -1,0 +1,15 @@
+{
+  "name": "feishu-china-map-plugin",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "output": "dist",
+  "dependencies": {},
+  "devDependencies": {
+    "vite": "^4.5.0"
+  }
+}
