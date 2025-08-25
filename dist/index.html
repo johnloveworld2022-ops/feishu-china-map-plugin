@@ -3,7 +3,10 @@
   <head>
     <base href="./">
     <!-- 确保这行在所有模块脚本之前 -->
-    <script>var fetch_disabled = true;</script>
+    <script>
+  // 作为全局函数暴露出去
+  window.fetch_disabled = function () { return true; };
+</script>
 
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="./vite.svg" />
