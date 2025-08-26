@@ -1,27 +1,61 @@
 <!doctype html>
 <html lang="zh-CN">
   <head>
-    <base href="./">
-
-    <!-- 一定要放在所有模块脚本之前，让 TS/JS 里可以调用 fetch_disabled() -->
-    <script>
-      // 作为全局函数暴露：返回 true 表示“禁用在线拉取，用本地数据”
-      window.fetch_disabled = function () { return true; };
-    </script>
-
+    <base href="./" />
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="./vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>飞书仪表盘 - 中国地图插件</title>
+    <title>飞书仪表盘 — 中国地图插件</title>
     <meta name="description" content="飞书仪表盘中国地图插件，根据地区负责人机构数量进行颜色标记" />
 
-    <!-- 构建产物（按你 dist 里的文件名保持不变） -->
-    <script type="module" crossorigin src="./assets/index-09ce1108.js"></script>
-    <link rel="modulepreload" crossorigin href="./assets/vendor-57209f9c.js">
-    <link rel="modulepreload" crossorigin href="./assets/echarts-9fe7269c.js">
-    <link rel="stylesheet" href="./assets/index-4ed0f864.css">
+    <!-- 在所有 module 脚本之前：给 fetch 做兜底 -->
+    <script>
+      // 可按需修改：当线上 geojson 请求失败时，转读的本地文件
+      window.__LOCAL_GEO_FALLBACK__ = "./assets/LOCAL_GEO_DISABLED.json";
 
-    <!-- 没有 hash 时自动跳到 #/，避免路由 404 -->
+      (function patchFetchForGeo() {
+        if (!window.fetch) return;
+        const ORG_FETCH = window.fetch.bind(window);
+
+        // 判定是否为地理数据请求（按你的项目域名规则来，这里比较宽松）
+        function isGeoJsonRequest(url) {
+          try {
+            const u = new URL(url, location.href);
+            // 命中你们线上地图服务域名或后缀是 .json/.geojson 的
+            return (
+              /geo\.datav\.aliyun\.com|echarts|map|china|province|city/i.test(u.href) ||
+              /\.geojson$/i.test(u.pathname) ||
+              /\.json$/i.test(u.pathname)
+            );
+          } catch (e) {
+            return false;
+          }
+        }
+
+        window.fetch = async function(input, init) {
+          let url = typeof input === "string" ? input : (input && input.url) || "";
+          try {
+            // 先按原样请求
+            return await ORG_FETCH(input, init);
+          } catch (err) {
+            // 只对地理数据做降级
+            if (isGeoJsonRequest(url) && window.__LOCAL_GEO_FALLBACK__) {
+              // 再用原生 fetch 读取本地 JSON，保持返回 Response 接口一致
+              return await ORG_FETCH(window.__LOCAL_GEO_FALLBACK__);
+            }
+            // 其他请求维持原始报错
+            throw err;
+          }
+        };
+      })();
+    </script>
+
+    <!-- Vite 产物（与你仓库中的文件名一致） -->
+    <link rel="stylesheet" href="./assets/index-4ed0f864.css" />
+    <script type="modulepreload" crossorigin src="./assets/vendor-57209f9c.js"></script>
+    <script type="modulepreload" crossorigin src="./assets/echarts-9fe7269c.js"></script>
+    <script type="module" crossorigin src="./assets/index-09ce1108.js"></script>
+
+    <!-- 首次进入时补 #/，兼容 hash 路由（你原文件就有） -->
     <script>
       (function ensureHashEntry() {
         try {
@@ -35,7 +69,6 @@
       })();
     </script>
   </head>
-
   <body>
     <div id="root"></div>
   </body>
