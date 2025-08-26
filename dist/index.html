@@ -73,6 +73,30 @@
     <script type="modulepreload" crossorigin src="./assets/echarts-9fe7269c.js"></script>
     <script type="module" crossorigin src="./assets/index-09ce1108.js"></script>
   </head>
+  <script type="module">
+  // 仅在本地开发（localhost 或 127.0.0.1）时启用
+  const isLocal =
+    /^(localhost|127\.0\.0\.1)$/.test(location.hostname) ||
+    // 也允许你用 Vite 的 --host 暴露到局域网：端口存在即认为是 dev
+    !!location.port;
+
+  (async () => {
+    if (!isLocal) return;
+
+    // 尝试接入 Vite HMR 客户端（即使失败也不影响下面的 main.js）
+    try { await import('/@vite/client'); } catch (e) {}
+
+    // 加载你的开发入口脚本（根目录是 /main.js；若在 src/ 下改成 /src/main.js）
+    try { await import('/main.js'); }
+    catch (e) {
+      console.error('[Dev Loader] 入口加载失败：', e);
+      const tips = document.createElement('div');
+      tips.style.cssText = 'position:fixed;left:12px;bottom:12px;padding:8px 12px;background:#fee;border:1px solid #f99;border-radius:8px;font:14px/1.4 system-ui';
+      tips.textContent = '开发入口 /main.js 加载失败，请确认路径是否正确（或改为 /src/main.js）';
+      document.body.appendChild(tips);
+    }
+  })();
+</script>
   <body>
     <div id="root"></div>
   </body>
