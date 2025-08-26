@@ -2,11 +2,12 @@
 <html lang="zh-CN">
   <head>
     <base href="./">
-    <!-- 确保这行在所有模块脚本之前 -->
+
+    <!-- 一定要放在所有模块脚本之前，让 TS/JS 里可以调用 fetch_disabled() -->
     <script>
-  // 作为全局函数暴露出去
-  window.fetch_disabled = function () { return true; };
-</script>
+      // 作为全局函数暴露：返回 true 表示“禁用在线拉取，用本地数据”
+      window.fetch_disabled = function () { return true; };
+    </script>
 
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="./vite.svg" />
@@ -14,13 +15,13 @@
     <title>飞书仪表盘 - 中国地图插件</title>
     <meta name="description" content="飞书仪表盘中国地图插件，根据地区负责人机构数量进行颜色标记" />
 
-    <!-- 构建产物 -->
+    <!-- 构建产物（按你 dist 里的文件名保持不变） -->
     <script type="module" crossorigin src="./assets/index-09ce1108.js"></script>
     <link rel="modulepreload" crossorigin href="./assets/vendor-57209f9c.js">
     <link rel="modulepreload" crossorigin href="./assets/echarts-9fe7269c.js">
     <link rel="stylesheet" href="./assets/index-4ed0f864.css">
 
-    <!-- hash 跳转处理 -->
+    <!-- 没有 hash 时自动跳到 #/，避免路由 404 -->
     <script>
       (function ensureHashEntry() {
         try {
