@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <base href="./" />
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>飞书仪表盘 — 中国地图插件</title>
+    <meta name="description" content="飞书仪表盘中国地图插件，根据地区负责人机构数量进行颜色标记" />
+
+    <!-- 在所有 module 脚本之前：定义降级函数 + 可选的全局兜底 -->
+    <script>
+      // 本地离线数据文件路径
+      window.__LOCAL_GEO_FALLBACK__ = "./assets/LOCAL_GEO_DISABLED.json";
+
+      /**
+       * 供业务代码调用的降级函数：与 fetch 返回值保持一致（Response）
+       * 允许 (url, init) 形式调用，也允许无参调用。
+       */
+      window.fetch_disabled = async function (_url, _init) {
+        return await window.fetch(window.__LOCAL_GEO_FALLBACK__, { cache: "no-cache" });
+      };
+
+      /**
+       *（可选）若你想自动兜底：线上 geojson 请求失败时，自动改读本地文件。
+       * 如果你只想依赖业务里的 fetch_disabled()，也可以把下面这一段整体删除。
+       */
+      (function patchFetchForGeo() {
+        if (!window.fetch) return;
+        const ORG_FETCH = window.fetch.bind(window);
+
+        function isGeoJsonRequest(url) {
+          try {
+            const u = new URL(url, location.href);
+            return (
+              /geo\.datav\.aliyun\.com|echarts|map|china|province|city/i.test(u.href) ||
+              /\.geojson$/i.test(u.pathname) ||
+              /\.json$/i.test(u.pathname)
+            );
+          } catch {
+            return false;
+          }
+        }
+
+        window.fetch = async function (input, init) {
+          const url = typeof input === "string" ? input : (input && input.url) || "";
+          try {
+            return await ORG_FETCH(input, init);
+          } catch (err) {
+            if (isGeoJsonRequest(url) && window.__LOCAL_GEO_FALLBACK__) {
+              return await ORG_FETCH(window.__LOCAL_GEO_FALLBACK__, { cache: "no-cache" });
+            }
+            throw err;
+          }
+        };
+      })();
+
+      // 首次进入时补 #/，兼容 hash 路由（你原文件已有）
+      (function ensureHashEntry() {
+        try {
+          if (!location.hash) {
+            var p = location.pathname.replace(/\/+/g, "/");
+            if (p.endsWith("/") || p.endsWith("/index.html")) {
+              location.replace(location.origin + location.pathname + location.search + "#/");
+            }
+          }
+        } catch (e) {}
+      })();
+    </script>
+
+    <!-- Vite 产物（文件名与你仓库一致） -->
+    <link rel="stylesheet" href="./assets/index-4ed0f864.css" />
+    <script type="modulepreload" crossorigin src="./assets/vendor-57209f9c.js"></script>
+    <script type="modulepreload" crossorigin src="./assets/echarts-9fe7269c.js"></script>
+    <script type="module" crossorigin src="./assets/index-09ce1108.js"></script>
+  </head>
+  <script type="module">
+  // 仅在本地开发（localhost 或 127.0.0.1）时启用
+  const isLocal =
+    /^(localhost|127\.0\.0\.1)$/.test(location.hostname) ||
+    // 也允许你用 Vite 的 --host 暴露到局域网：端口存在即认为是 dev
+    !!location.port;
+
+  (async () => {
+    if (!isLocal) return;
+
+    // 尝试接入 Vite HMR 客户端（即使失败也不影响下面的 main.js）
+    try { await import('/@vite/client'); } catch (e) {}
+
+    // 加载你的开发入口脚本（根目录是 /main.js；若在 src/ 下改成 /src/main.js）
+    try { await import('/main.js'); }
+    catch (e) {
+      console.error('[Dev Loader] 入口加载失败：', e);
+      const tips = document.createElement('div');
+      tips.style.cssText = 'position:fixed;left:12px;bottom:12px;padding:8px 12px;background:#fee;border:1px solid #f99;border-radius:8px;font:14px/1.4 system-ui';
+      tips.textContent = '开发入口 /main.js 加载失败，请确认路径是否正确（或改为 /src/main.js）';
+      document.body.appendChild(tips);
+    }
+  })();
+</script>
+  <body>
+    <div id="root"></div>
+  </body>
+</html>
