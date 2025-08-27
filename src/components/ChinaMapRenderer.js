@@ -162,28 +162,14 @@ export class ChinaMapRenderer {
           return
         }
       } catch (localError) {
-        console.warn('从本地加载地图数据失败，尝试CDN:', localError.message)
-      }
-
-      // 如果本地加载失败，尝试从CDN加载
-      try {
-        const response = await fetch('https://geo.datav.aliyun.com/areas_v3/bound/100000_full.json')
-        if (response.ok) {
-          const chinaMapData = await response.json()
-          window.echarts.registerMap('china', chinaMapData)
-          this.mapData = chinaMapData
-          console.log('成功从CDN加载完整中国地图数据')
-          return
-        }
-      } catch (cdnError) {
-        console.warn('从CDN加载地图数据失败，使用简化数据:', cdnError.message)
+        console.warn('从本地加载地图数据失败，使用内置数据:', localError.message)
       }
       
-      // 如果都失败了，使用简化的中国地图数据
+      // 使用内置的中国地图数据（符合数据安全要求）
       const chinaMapData = this._getChinaMapData()
       window.echarts.registerMap('china', chinaMapData)
       this.mapData = chinaMapData
-      console.log('使用简化中国地图数据')
+      console.log('使用内置中国地图数据')
     } catch (error) {
       console.error('加载地图数据失败:', error)
       throw error

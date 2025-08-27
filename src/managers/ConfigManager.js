@@ -99,8 +99,8 @@ export class ConfigManager {
    */
   _isInDashboard() {
     return typeof window !== 'undefined' && 
-           typeof window.dashboard?.getConfig === 'function' &&
-           typeof window.dashboard?.saveConfig === 'function'
+           typeof window.getConfig === 'function' &&
+           typeof window.saveConfig === 'function'
   }
 
   /**

@@ -1,0 +1,18 @@
+{
+  "name": "中国地图可视化插件",
+  "description": "基于飞书多维表格数据的中国地图可视化插件",
+  "version": "1.0.0",
+  "author": "Your Name",
+  "entry": "index.html",
+  "permissions": [
+    "bitable:read"
+  ],
+  "capabilities": [
+    "visualization",
+    "data-analysis"
+  ],
+  "supportedPlatforms": [
+    "web",
+    "desktop"
+  ]
+}

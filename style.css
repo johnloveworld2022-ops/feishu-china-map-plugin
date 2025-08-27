@@ -570,8 +570,9 @@ body {
   bottom: 0;
   background: rgba(0,0,0,0.5);
   z-index: -1;
-}/
-* 数据预览器样式 */
+}
+
+/* 数据预览器样式 */
 .data-preview {
   background: white;
   border-radius: 6px;
