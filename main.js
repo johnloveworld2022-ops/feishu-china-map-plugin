@@ -26,7 +26,7 @@ document.querySelector('#root').innerHTML = `
         <button id="btn-load-example">加载示例配置</button>
         <button id="btn-validate">验证配置</button>
         <button id="btn-test-connection">测试连接</button>
-        <button id="btn-save">保存配置</button>
+        <button id="btn-save">保存到仪表盘</button>
         <button id="btn-status-panel" class="btn-secondary">状态面板</button>
       </div>
       <div id="config-status" class="status-info"></div>
@@ -369,6 +369,7 @@ function isValidRealConfig(config) {
     statusManager.setConfigStatus('loading', '正在加载配置...')
     
     const saved = await configManager.loadConfig()
+    console.log('[Bootstrap] 加载的配置:', saved)
     $input.value = JSON.stringify(saved, null, 2)
     
     // 只有在配置是真实有效的配置时才渲染数据
@@ -615,13 +616,16 @@ $('#btn-test-connection').addEventListener('click', async () => {
   }
 })
 
-// 保存配置
+// 保存配置到仪表盘
 $('#btn-save').addEventListener('click', async () => {
   try {
-    statusManager.setConfigStatus('saving', '正在保存配置...')
+    statusManager.setConfigStatus('saving', '正在保存配置到仪表盘...')
     
     const config = $input.value.trim() ? JSON.parse($input.value) : {}
+    console.log('[保存配置] 准备保存的配置:', config)
+    
     const result = await configManager.saveConfig(config)
+    console.log('[保存配置] 保存结果:', result)
     
     if (result.success) {
       statusManager.setConfigStatus('saved', result.message)

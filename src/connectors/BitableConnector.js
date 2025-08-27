@@ -184,6 +184,12 @@ export class BitableConnector {
       return this._getMockData(endpoint, body)
     }
 
+    // 生产环境：检查是否在飞书环境中
+    if (this._isInFeishuEnvironment()) {
+      return this._makeFeishuSDKRequest(endpoint, body)
+    }
+
+    // 开发环境：使用代理服务器
     const controller = new AbortController()
     const timeoutId = setTimeout(() => controller.abort(), this.timeout)
 
@@ -227,6 +233,85 @@ export class BitableConnector {
    */
   _isDevelopmentMode() {
     return location.hostname === 'localhost' || location.hostname === '127.0.0.1'
+  }
+
+  /**
+   * 检测是否在飞书环境中
+   * @private
+   */
+  _isInFeishuEnvironment() {
+    return typeof window !== 'undefined' && 
+           typeof window.bitable !== 'undefined'
+  }
+
+  /**
+   * 使用飞书SDK进行API调用
+   * @private
+   */
+  async _makeFeishuSDKRequest(endpoint, body) {
+    try {
+      if (!window.bitable) {
+        throw new Error('飞书SDK未加载')
+      }
+
+      const { appToken, tableId, viewId, pageSize, pageToken } = body
+
+      if (endpoint === '/api/bitable/test') {
+        // 测试连接：尝试获取表格信息
+        const table = await window.bitable.base.getTableById(tableId)
+        const recordList = await table.getRecordList()
+        
+        return {
+          code: 0,
+          msg: 'success',
+          data: {
+            connected: true,
+            recordCount: recordList.length
+          }
+        }
+      } else if (endpoint === '/api/bitable/search') {
+        // 获取记录：使用飞书SDK
+        const table = await window.bitable.base.getTableById(tableId)
+        const view = await table.getViewById(viewId)
+        
+        // 获取记录列表
+        const recordIdList = await view.getVisibleRecordIdList()
+        const records = []
+        
+        // 分页处理
+        const startIndex = pageToken ? parseInt(pageToken) : 0
+        const endIndex = Math.min(startIndex + pageSize, recordIdList.length)
+        
+        for (let i = startIndex; i < endIndex; i++) {
+          const recordId = recordIdList[i]
+          const record = await table.getRecordById(recordId)
+          const fields = await record.getFields()
+          
+          records.push({
+            record_id: recordId,
+            fields: fields,
+            created_time: Date.now(),
+            last_modified_time: Date.now()
+          })
+        }
+        
+        return {
+          code: 0,
+          msg: 'success',
+          data: {
+            items: records,
+            has_more: endIndex < recordIdList.length,
+            page_token: endIndex < recordIdList.length ? endIndex.toString() : null,
+            total: recordIdList.length
+          }
+        }
+      } else {
+        throw new Error(`不支持的端点: ${endpoint}`)
+      }
+    } catch (error) {
+      console.error('飞书SDK调用失败:', error)
+      throw new Error(`飞书SDK调用失败: ${error.message}`)
+    }
   }
 
   /**

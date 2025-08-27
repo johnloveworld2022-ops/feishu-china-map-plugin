@@ -98,9 +98,18 @@ export class ConfigManager {
    * 检测是否在飞书仪表盘环境中
    */
   _isInDashboard() {
-    return typeof window !== 'undefined' && 
+    const inDashboard = typeof window !== 'undefined' && 
            typeof window.getConfig === 'function' &&
            typeof window.saveConfig === 'function'
+    
+    console.log('[ConfigManager] 仪表盘环境检测:', {
+      hasWindow: typeof window !== 'undefined',
+      hasGetConfig: typeof window?.getConfig === 'function',
+      hasSaveConfig: typeof window?.saveConfig === 'function',
+      inDashboard
+    })
+    
+    return inDashboard
   }
 
   /**
@@ -109,7 +118,7 @@ export class ConfigManager {
   async loadConfig() {
     try {
       if (this._isInDashboard()) {
-        const config = await window.dashboard.getConfig()
+        const config = await window.getConfig()
         return config || this.getConfigTemplate()
       }
       
@@ -143,7 +152,7 @@ export class ConfigManager {
       }
 
       if (this._isInDashboard()) {
-        await window.dashboard.saveConfig(config)
+        await window.saveConfig(config)
         return {
           success: true,
           message: '配置已保存到仪表盘'
