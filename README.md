@@ -1,21 +1,63 @@
-# Feishu China Map Plugin — Source Config (Lightweight)
+# 飞书多维表格中国地图插件
 
-This package provides the minimal source-side configuration required by Feishu's review:
-- **`package.json`** with `"output": "dist"` and Vite scripts
-- **`vite.config.js`** with `base: './'` and `build.outDir = 'dist'`
+这是一个飞书多维表格插件，可以将多维表格中的机构数据在中国地图上进行可视化展示。
 
-> Use this alongside your built artifact (`dist.zip` / `dist/`) already uploaded.
+## 功能特性
 
-## How to use
+- 🗺️ **中国地图可视化**：将机构数据在中国地图上进行地理分布展示
+- 📊 **数据统计**：自动统计各省份的机构数量
+- 🎨 **颜色渐变**：根据机构数量显示不同颜色深浅
+- 🖱️ **交互功能**：支持鼠标悬停查看详情、缩放拖拽等操作
+- ⚡ **实时同步**：与飞书多维表格数据实时同步
 
-1. Put these three files at the **root** of your GitHub repository:
-   - `package.json`
-   - `vite.config.js`
-   - `README.md` (this file)
+## 使用方法
 
-2. Commit and push. This satisfies the “source is buildable” requirement.
+1. **配置多维表格信息**：
+   - App Token：多维表格的应用令牌
+   - Table ID：数据表ID
+   - View ID：视图ID
 
-3. (Optional) If you later add real source code, run:
-   ```bash
-   npm install
-   npm run build
+2. **配置数据映射**：
+   - 区域字段：选择包含省份信息的字段
+   - 机构字段：选择机构名称字段
+
+3. **查看地图**：配置完成后即可查看中国地图上的机构分布
+
+## 技术架构
+
+- **前端框架**：原生 JavaScript + ECharts
+- **地图渲染**：ECharts 地图组件
+- **数据连接**：飞书多维表格 API
+- **部署方式**：静态文件部署
+
+## 文件结构
+
+```
+├── main.js                     # 主入口文件
+├── style.css                   # 样式文件
+├── index.html                  # HTML模板
+├── src/
+│   ├── components/
+│   │   └── ChinaMapRenderer.js # 中国地图渲染器
+│   ├── connectors/
+│   │   └── BitableConnector.js # 飞书多维表格连接器
+│   ├── managers/
+│   │   ├── ConfigManager.js    # 配置管理器
+│   │   └── StatusManager.js    # 状态管理器
+│   ├── previewers/
+│   │   └── DataPreviewer.js    # 数据预览器
+│   ├── validators/
+│   │   └── DataValidator.js    # 数据验证器
+│   └── sdk/
+│       └── config.js           # SDK配置
+└── server/
+    └── proxy.js                # 代理服务器
+```
+
+## 部署说明
+
+本插件支持通过 GitHub 仓库进行自动部署到飞书插件平台。
+
+## 开发者
+
+如需二次开发或定制功能，请参考源代码中的注释和文档。

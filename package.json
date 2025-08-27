@@ -1,17 +1,26 @@
 {
   "name": "feishu-china-map-plugin",
   "version": "1.0.0",
-  "private": true,
+  "description": "飞书多维表格中国地图可视化插件",
+  "main": "main.js",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview --port 5050"
+    "preview": "vite preview"
   },
-  "output": "dist",
-  "dependencies": {
-    "echarts": "^5.5.0"
-  },
+  "keywords": [
+    "feishu",
+    "bitable",
+    "china-map",
+    "visualization",
+    "echarts"
+  ],
+  "author": "Your Name",
+  "license": "MIT",
   "devDependencies": {
-    "vite": "^4.5.0"
+    "vite": "^4.4.5"
+  },
+  "dependencies": {
+    "echarts": "^5.4.3"
   }
 }
