@@ -1,0 +1,841 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🏦 飞书银行机构地图仪表盘</title>
+    <link rel="icon" type="image/svg+xml" href="icon.svg">
+    
+    <!-- 飞书插件 SDK -->
+    <script src="https://lf1-cdn-tos.bytegoofy.com/obj/static/lark/sdk/feishu-1.0.0.js"></script>
+    <!-- ECharts 地图库 -->
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f5f5;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 100%;
+            margin: 0 auto;
+            background: white;
+            min-height: 100vh;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 24px;
+            margin-bottom: 8px;
+            font-weight: 700;
+        }
+        
+        .header p {
+            opacity: 0.9;
+            font-size: 14px;
+        }
+        
+        /* 数据导入确认步骤 */
+        .step-container {
+            padding: 30px;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        
+        .step-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .step-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 8px;
+        }
+        
+        .step-description {
+            font-size: 14px;
+            color: #666;
+        }
+        
+        .data-preview {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 25px;
+        }
+        
+        .preview-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: #333;
+        }
+        
+        .data-summary {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+        
+        .summary-card {
+            background: white;
+            border-radius: 8px;
+            padding: 15px;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .summary-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 5px;
+        }
+        
+        .summary-label {
+            font-size: 12px;
+            color: #666;
+        }
+        
+        .data-table {
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-bottom: 25px;
+        }
+        
+        .table-header {
+            background: #667eea;
+            color: white;
+            padding: 12px 15px;
+            font-weight: 600;
+            font-size: 14px;
+        }
+        
+        .table-content {
+            max-height: 250px;
+            overflow-y: auto;
+        }
+        
+        .table-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr 2fr;
+            gap: 15px;
+            padding: 12px 15px;
+            border-bottom: 1px solid #eee;
+            align-items: center;
+            font-size: 14px;
+        }
+        
+        .table-row:hover {
+            background: #f8f9fa;
+        }
+        
+        .region-tag {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 500;
+            color: white;
+        }
+        
+        .action-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 30px;
+        }
+        
+        .btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            min-width: 120px;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.3);
+        }
+        
+        .btn-secondary {
+            background: #f8f9fa;
+            color: #666;
+            border: 2px solid #e9ecef;
+        }
+        
+        .btn-secondary:hover {
+            background: #e9ecef;
+        }
+        
+        /* 地图展示区域 */
+        .dashboard-view {
+            display: none;
+        }
+        
+        .main-content {
+            display: flex;
+            min-height: 500px;
+        }
+        
+        .map-section {
+            flex: 1;
+            padding: 20px;
+            background: #f8f9fa;
+        }
+        
+        .map-container {
+            background: white;
+            border-radius: 12px;
+            padding: 15px;
+            height: 400px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        }
+        
+        .sidebar {
+            width: 300px;
+            background: white;
+            padding: 20px;
+            border-left: 1px solid #e9ecef;
+            overflow-y: auto;
+        }
+        
+        .legend {
+            margin-top: 15px;
+            padding: 15px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .legend-title {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: #333;
+        }
+        
+        .legend-items {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 8px;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            font-size: 12px;
+            color: #666;
+            padding: 6px;
+            background: #f8f9fa;
+            border-radius: 4px;
+        }
+        
+        .legend-color {
+            width: 14px;
+            height: 14px;
+            border-radius: 3px;
+            margin-right: 8px;
+        }
+        
+        .back-button {
+            position: fixed;
+            top: 15px;
+            left: 15px;
+            background: rgba(0,0,0,0.7);
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            z-index: 1000;
+        }
+        
+        .back-button:hover {
+            background: rgba(0,0,0,0.9);
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 50px;
+            color: #666;
+        }
+        
+        .error {
+            text-align: center;
+            padding: 50px;
+            color: #d32f2f;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏦 飞书银行机构地图仪表盘</h1>
+            <p>多维表格数据可视化展示</p>
+        </div>
+        
+        <!-- 加载状态 -->
+        <div id="loadingState" class="loading">
+            <div>🔄 正在加载数据...</div>
+        </div>
+        
+        <!-- 错误状态 -->
+        <div id="errorState" class="error" style="display: none;">
+            <div>❌ 数据加载失败</div>
+            <div id="errorMessage" style="font-size: 14px; margin-top: 10px;"></div>
+        </div>
+        
+        <!-- 数据确认步骤 -->
+        <div id="dataConfirmStep" class="step-container" style="display: none;">
+            <div class="step-header">
+                <div class="step-title">📊 数据预览与确认</div>
+                <div class="step-description">请确认从多维表格导入的数据是否正确，然后点击"生成地图"按钮</div>
+            </div>
+            
+            <div class="data-preview">
+                <div class="preview-title">📈 数据概览</div>
+                <div class="data-summary" id="dataSummary">
+                    <!-- 动态生成 -->
+                </div>
+                
+                <div class="data-table">
+                    <div class="table-header">
+                        <div class="table-row">
+                            <div>省份</div>
+                            <div>区域</div>
+                            <div>负责人</div>
+                            <div>机构名称</div>
+                        </div>
+                    </div>
+                    <div class="table-content" id="dataTableContent">
+                        <!-- 动态生成 -->
+                    </div>
+                </div>
+            </div>
+            
+            <div class="action-buttons">
+                <button class="btn btn-secondary" onclick="cancelImport()">
+                    ❌ 取消导入
+                </button>
+                <button class="btn btn-primary" onclick="confirmAndGenerateMap()">
+                    ✅ 确认数据，生成地图
+                </button>
+            </div>
+        </div>
+        
+        <!-- 地图展示区域 -->
+        <div id="dashboardView" class="dashboard-view">
+            <button class="back-button" onclick="backToDataConfirm()">
+                ← 返回数据确认
+            </button>
+            
+            <div class="main-content">
+                <div class="map-section">
+                    <div class="map-container">
+                        <div id="map" style="width: 100%; height: 100%;"></div>
+                    </div>
+                    
+                    <div class="legend">
+                        <div class="legend-title">区域颜色图例</div>
+                        <div class="legend-items" id="legendItems">
+                            <!-- 动态生成 -->
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="sidebar">
+                    <div id="regionDetails">
+                        <!-- 动态生成 -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 区域颜色配置 - 按机构数量深浅
+        const regionColors = {
+            '华东': { base: '#1976D2', light: '#E3F2FD', medium: '#90CAF9', dark: '#0D47A1' },
+            '华南': { base: '#388E3C', light: '#E8F5E8', medium: '#81C784', dark: '#1B5E20' },
+            '华北': { base: '#F57C00', light: '#FFF3E0', medium: '#FFB74D', dark: '#E65100' },
+            '华中': { base: '#7B1FA2', light: '#F3E5F5', medium: '#BA68C8', dark: '#4A148C' },
+            '西南': { base: '#D32F2F', light: '#FFEBEE', medium: '#E57373', dark: '#B71C1C' },
+            '西北': { base: '#455A64', light: '#ECEFF1', medium: '#90A4AE', dark: '#263238' },
+            '东北': { base: '#E64A19', light: '#FBE9E7', medium: '#FF8A65', dark: '#BF360C' },
+            '其他': { base: '#9E9E9E', light: '#F5F5F5', medium: '#BDBDBD', dark: '#424242' }
+        };
+        
+        let globalData = null;
+        let chart = null;
+        
+        // 飞书插件初始化
+        window.onFeishuPluginReady = function() {
+            console.log('飞书插件已准备就绪');
+            initializePlugin();
+        };
+        
+        // 插件配置更新
+        window.onFeishuPluginConfig = function(config) {
+            console.log('插件配置更新:', config);
+            if (config && config.bitable) {
+                loadBitableData(config.bitable);
+            }
+        };
+        
+        // 插件保存回调
+        window.onFeishuPluginSave = function() {
+            console.log('插件保存回调');
+            return Promise.resolve({
+                success: true,
+                data: globalData
+            });
+        };
+        
+        // 初始化插件
+        function initializePlugin() {
+            // 检查是否在飞书环境中
+            if (typeof window.FeishuPlugin !== 'undefined') {
+                // 在飞书环境中，等待配置
+                console.log('在飞书环境中运行');
+            } else {
+                // 本地测试环境，使用演示数据
+                console.log('本地测试环境，使用演示数据');
+                loadDemoData();
+            }
+        }
+        
+        // 加载多维表格数据
+        function loadBitableData(bitableConfig) {
+            showLoading();
+            
+            // 这里应该调用飞书API获取多维表格数据
+            // 由于是在插件环境中，使用飞书SDK
+            if (window.FeishuPlugin && window.FeishuPlugin.bitable) {
+                window.FeishuPlugin.bitable.getRecords({
+                    tableId: bitableConfig.tableId
+                }).then(records => {
+                    const processedData = processRecords(records);
+                    showDataConfirmation(processedData);
+                }).catch(error => {
+                    showError('获取多维表格数据失败: ' + error.message);
+                });
+            } else {
+                // 降级到演示数据
+                loadDemoData();
+            }
+        }
+        
+        // 加载演示数据
+        function loadDemoData() {
+            const demoData = [
+                { province: '浙江省', region: '华东', manager: '小李', organization: '浙商银行' },
+                { province: '浙江省', region: '华东', manager: '小李', organization: '杭州银行' },
+                { province: '广东省', region: '华南', manager: '小张', organization: '深圳银行' },
+                { province: '上海市', region: '华东', manager: '小李', organization: '上海银行' },
+                { province: '广东省', region: '华南', manager: '小陈', organization: '广州银行' },
+                { province: '北京市', region: '华北', manager: '小王', organization: '北京银行' },
+                { province: '江苏省', region: '华东', manager: '小李', organization: '江苏银行' },
+                { province: '山东省', region: '华北', manager: '小王', organization: '山东银行' }
+            ];
+            
+            const processedData = processRawData(demoData);
+            showDataConfirmation(processedData);
+        }
+        
+        // 处理飞书记录数据
+        function processRecords(records) {
+            const rawData = records.map(record => {
+                const fields = record.fields;
+                let province = fields['所属省份'] || '';
+                
+                // 标准化省份名称
+                if (province.includes('浙江')) province = '浙江省';
+                else if (province.includes('广东')) province = '广东省';
+                else if (province.includes('上海')) province = '上海市';
+                else if (province.includes('北京')) province = '北京市';
+                else if (province.includes('江苏')) province = '江苏省';
+                else if (province.includes('山东')) province = '山东省';
+                
+                return {
+                    province: province,
+                    region: fields['管理区域'] || '其他',
+                    manager: fields['负责人'] || '未知',
+                    organization: fields['机构名称'] || '未知'
+                };
+            }).filter(item => item.province && item.organization);
+            
+            return processRawData(rawData);
+        }
+        
+        // 处理原始数据
+        function processRawData(rawData) {
+            // 按省份聚合数据
+            const provinceData = {};
+            rawData.forEach(item => {
+                if (!provinceData[item.province]) {
+                    provinceData[item.province] = {
+                        province: item.province,
+                        region: item.region,
+                        institutionCount: 0,
+                        managers: new Set(),
+                        organizations: []
+                    };
+                }
+                provinceData[item.province].institutionCount += 1;
+                provinceData[item.province].managers.add(item.manager);
+                provinceData[item.province].organizations.push(item.organization);
+            });
+            
+            // 转换为最终格式
+            const mapData = Object.values(provinceData).map(item => ({
+                name: item.province,
+                value: item.institutionCount,
+                region: item.region,
+                institutionCount: item.institutionCount,
+                managers: Array.from(item.managers),
+                organizations: item.organizations
+            }));
+            
+            // 统计区域信息并计算颜色深浅
+            const regionStats = {};
+            mapData.forEach(item => {
+                if (!regionStats[item.region]) {
+                    regionStats[item.region] = {
+                        provinces: [],
+                        totalInstitutions: 0,
+                        managers: new Set(),
+                        maxInstitutions: 0
+                    };
+                }
+                regionStats[item.region].provinces.push(item.name);
+                regionStats[item.region].totalInstitutions += item.institutionCount;
+                regionStats[item.region].maxInstitutions = Math.max(regionStats[item.region].maxInstitutions, item.institutionCount);
+                item.managers.forEach(manager => regionStats[item.region].managers.add(manager));
+            });
+            
+            // 为每个省份设置颜色（基于该区域内机构数量的相对密度）
+            mapData.forEach(item => {
+                const regionStat = regionStats[item.region];
+                const colorConfig = regionColors[item.region] || regionColors['其他'];
+                
+                // 根据机构数量计算颜色深浅
+                let color;
+                if (item.institutionCount >= 3) {
+                    color = colorConfig.dark;  // 深色
+                } else if (item.institutionCount >= 2) {
+                    color = colorConfig.base;  // 基础色
+                } else {
+                    color = colorConfig.light; // 浅色
+                }
+                
+                item.itemStyle = { areaColor: color };
+            });
+            
+            return { mapData, regionStats, rawData };
+        }
+        
+        // 显示加载状态
+        function showLoading() {
+            document.getElementById('loadingState').style.display = 'block';
+            document.getElementById('errorState').style.display = 'none';
+            document.getElementById('dataConfirmStep').style.display = 'none';
+            document.getElementById('dashboardView').style.display = 'none';
+        }
+        
+        // 显示错误状态
+        function showError(message) {
+            document.getElementById('loadingState').style.display = 'none';
+            document.getElementById('errorState').style.display = 'block';
+            document.getElementById('errorMessage').textContent = message;
+            document.getElementById('dataConfirmStep').style.display = 'none';
+            document.getElementById('dashboardView').style.display = 'none';
+        }
+        
+        // 显示数据确认
+        function showDataConfirmation(data) {
+            globalData = data;
+            const { mapData, regionStats, rawData } = data;
+            
+            document.getElementById('loadingState').style.display = 'none';
+            document.getElementById('errorState').style.display = 'none';
+            document.getElementById('dataConfirmStep').style.display = 'block';
+            document.getElementById('dashboardView').style.display = 'none';
+            
+            // 生成数据概览
+            const summaryHTML = \`
+                <div class="summary-card">
+                    <div class="summary-value">\${rawData.length}</div>
+                    <div class="summary-label">总机构数</div>
+                </div>
+                <div class="summary-card">
+                    <div class="summary-value">\${mapData.length}</div>
+                    <div class="summary-label">覆盖省份</div>
+                </div>
+                <div class="summary-card">
+                    <div class="summary-value">\${Object.keys(regionStats).length}</div>
+                    <div class="summary-label">覆盖区域</div>
+                </div>
+                <div class="summary-card">
+                    <div class="summary-value">\${[...new Set(rawData.map(d => d.manager))].length}</div>
+                    <div class="summary-label">负责人数</div>
+                </div>
+            \`;
+            document.getElementById('dataSummary').innerHTML = summaryHTML;
+            
+            // 生成数据表格
+            const tableHTML = rawData.slice(0, 10).map(item => \`
+                <div class="table-row">
+                    <div>\${item.province}</div>
+                    <div>
+                        <span class="region-tag" style="background: \${(regionColors[item.region] || regionColors['其他']).base};">
+                            \${item.region}
+                        </span>
+                    </div>
+                    <div>\${item.manager}</div>
+                    <div>\${item.organization}</div>
+                </div>
+            \`).join('') + (rawData.length > 10 ? \`
+                <div class="table-row" style="text-align: center; color: #666; font-style: italic;">
+                    <div style="grid-column: 1 / -1;">... 还有 \${rawData.length - 10} 条记录</div>
+                </div>
+            \` : '');
+            document.getElementById('dataTableContent').innerHTML = tableHTML;
+        }
+        
+        // 取消导入
+        function cancelImport() {
+            if (confirm('确定要取消导入吗？')) {
+                if (window.FeishuPlugin) {
+                    window.FeishuPlugin.close();
+                } else {
+                    alert('已取消导入');
+                }
+            }
+        }
+        
+        // 确认并生成地图
+        function confirmAndGenerateMap() {
+            document.getElementById('dataConfirmStep').style.display = 'none';
+            document.getElementById('dashboardView').style.display = 'block';
+            
+            // 延迟初始化地图，确保DOM已渲染
+            setTimeout(() => {
+                initializeMap();
+                generateSidebar();
+                generateLegend();
+            }, 100);
+        }
+        
+        // 返回数据确认
+        function backToDataConfirm() {
+            document.getElementById('dashboardView').style.display = 'none';
+            document.getElementById('dataConfirmStep').style.display = 'block';
+            
+            // 销毁地图实例
+            if (chart) {
+                chart.dispose();
+                chart = null;
+            }
+        }
+        
+        // 初始化地图
+        function initializeMap() {
+            if (!globalData) return;
+            
+            if (chart) {
+                chart.dispose();
+            }
+            
+            chart = echarts.init(document.getElementById('map'));
+            
+            // 获取中国地图数据
+            fetch('https://geo.datav.aliyun.com/areas_v3/bound/100000_full.json')
+                .then(response => response.json())
+                .then(geoJson => {
+                    echarts.registerMap('china', geoJson);
+                    
+                    const option = {
+                        title: {
+                            text: '银行机构区域分布图',
+                            left: 'center',
+                            top: 15,
+                            textStyle: {
+                                color: '#333',
+                                fontSize: 16,
+                                fontWeight: 'bold'
+                            }
+                        },
+                        tooltip: {
+                            trigger: 'item',
+                            backgroundColor: 'rgba(0,0,0,0.85)',
+                            borderColor: 'transparent',
+                            borderRadius: 6,
+                            textStyle: {
+                                color: '#fff',
+                                fontSize: 12
+                            },
+                            formatter: function(params) {
+                                if (params.data) {
+                                    const data = params.data;
+                                    return \`
+                                        <div style="padding: 12px; max-width: 250px;">
+                                            <div style="font-weight: bold; margin-bottom: 8px; font-size: 14px;">
+                                                🏛️ \${data.name}
+                                            </div>
+                                            <div style="margin-bottom: 6px;">
+                                                🌏 所属区域: <span style="color: \${(regionColors[data.region] || regionColors['其他']).base};">\${data.region}</span>
+                                            </div>
+                                            <div style="margin-bottom: 6px;">
+                                                🏦 机构数量: <span style="color: #64B5F6;">\${data.institutionCount}家</span>
+                                            </div>
+                                            <div style="margin-bottom: 6px;">
+                                                👥 负责人: <span style="color: #81C784;">\${data.managers.join(', ')}</span>
+                                            </div>
+                                            <div style="margin-bottom: 3px; font-weight: 600;">机构列表:</div>
+                                            <div style="font-size: 11px; color: #E0E0E0;">
+                                                \${data.organizations.join(' • ')}
+                                            </div>
+                                        </div>
+                                    \`;
+                                }
+                                return \`<div style="padding: 8px;">\${params.name}<br/>暂无数据</div>\`;
+                            }
+                        },
+                        series: [{
+                            name: '银行机构',
+                            type: 'map',
+                            map: 'china',
+                            roam: true,
+                            emphasis: {
+                                label: {
+                                    show: true,
+                                    color: '#fff',
+                                    fontSize: 11,
+                                    fontWeight: 'bold'
+                                },
+                                itemStyle: {
+                                    shadowBlur: 15,
+                                    shadowColor: 'rgba(0,0,0,0.3)'
+                                }
+                            },
+                            itemStyle: {
+                                borderColor: '#fff',
+                                borderWidth: 1,
+                                shadowBlur: 3,
+                                shadowColor: 'rgba(0,0,0,0.1)',
+                                areaColor: '#f0f0f0'
+                            },
+                            data: globalData.mapData
+                        }]
+                    };
+                    
+                    chart.setOption(option);
+                    
+                    // 响应式
+                    window.addEventListener('resize', () => {
+                        if (chart) {
+                            chart.resize();
+                        }
+                    });
+                })
+                .catch(error => {
+                    console.error('地图加载失败:', error);
+                    document.getElementById('map').innerHTML = \`
+                        <div style="display: flex; align-items: center; justify-content: center; height: 100%; color: #666; font-size: 14px;">
+                            <div style="text-align: center;">
+                                <div style="font-size: 40px; margin-bottom: 12px;">🏦</div>
+                                <div>地图加载失败，请检查网络连接</div>
+                            </div>
+                        </div>
+                    \`;
+                });
+        }
+        
+        // 生成侧边栏
+        function generateSidebar() {
+            if (!globalData) return;
+            
+            const { regionStats } = globalData;
+            const sidebarHTML = \`
+                <div style="margin-bottom: 25px;">
+                    <h3 style="margin-bottom: 15px; color: #333; font-size: 16px;">🌏 区域分布详情</h3>
+                    \${Object.keys(regionStats).map(region => {
+                        const stats = regionStats[region];
+                        const colorConfig = regionColors[region] || regionColors['其他'];
+                        return \`
+                            <div style="background: #f8f9fa; border-radius: 8px; padding: 12px; margin-bottom: 12px;">
+                                <div style="display: flex; align-items: center; margin-bottom: 8px;">
+                                    <span style="width: 10px; height: 10px; border-radius: 50%; background: \${colorConfig.base}; margin-right: 6px;"></span>
+                                    <strong style="font-size: 14px;">\${region}</strong>
+                                    <span style="margin-left: auto; color: #666; font-size: 12px;">\${stats.totalInstitutions}家机构</span>
+                                </div>
+                                <div style="font-size: 12px; color: #666; line-height: 1.4;">
+                                    <div>省份: \${stats.provinces.join(', ')}</div>
+                                    <div>负责人: \${Array.from(stats.managers).join(', ')}</div>
+                                </div>
+                            </div>
+                        \`;
+                    }).join('')}
+                </div>
+            \`;
+            document.getElementById('regionDetails').innerHTML = sidebarHTML;
+        }
+        
+        // 生成图例
+        function generateLegend() {
+            if (!globalData) return;
+            
+            const { regionStats } = globalData;
+            const legendHTML = Object.keys(regionStats).map(region => {
+                const stats = regionStats[region];
+                const colorConfig = regionColors[region] || regionColors['其他'];
+                return \`
+                    <div class="legend-item">
+                        <span class="legend-color" style="background: \${colorConfig.base};"></span>
+                        <span>\${region} (\${stats.provinces.length}省, \${stats.totalInstitutions}机构)</span>
+                    </div>
+                \`;
+            }).join('');
+            document.getElementById('legendItems').innerHTML = legendHTML;
+        }
+        
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            // 如果不在飞书环境中，直接初始化
+            if (typeof window.FeishuPlugin === 'undefined') {
+                initializePlugin();
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,51 @@
+{
+  "manifest_version": "1.0",
+  "name": {
+    "zh_cn": "中国地图仪表盘",
+    "en_us": "China Map Dashboard"
+  },
+  "version": "1.0.1",
+  "description": {
+    "zh_cn": "基于飞书多维表格的中国地图数据可视化插件，支持自定义区域配置和智能颜色标记",
+    "en_us": "China map visualization plugin based on Feishu Bitable with custom region configuration and intelligent color coding"
+  },
+  "developer": {
+    "name": "Developer",
+    "email": "1281991939@qq.com",
+    "url": "https://github.com/developer/feishu-china-map-dashboard"
+  },
+  "icons": {
+    "16": "icon-16.png",
+    "32": "icon-32.png",
+    "48": "icon-48.png",
+    "128": "icon-128.png"
+  },
+  "permissions": [
+    "bitable:app",
+    "user.info:read",
+    "contact:user.base:readonly"
+  ],
+  "gadget": {
+    "enable_setting_menu": true,
+    "enable_context_menu": false,
+    "support_platforms": ["web", "mac", "win", "mobile"]
+  },
+  "i18n": [
+    {
+      "language": "zh_cn",
+      "file": "locales/zh_cn.json"
+    },
+    {
+      "language": "en_us", 
+      "file": "locales/en_us.json"
+    }
+  ],
+  "config": {
+    "container_size": {
+      "width": 800,
+      "height": 600
+    },
+    "support_config": true,
+    "support_callback": true
+  }
+}

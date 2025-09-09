@@ -1,0 +1,4 @@
+GITHUB_USERNAME=johnloveworld2022-ops
+REPO_NAME=feishu-china-map-plugin
+REPO_URL=https://github.com/johnloveworld2022-ops/feishu-china-map-plugin.git
+REPO_EXISTS=true

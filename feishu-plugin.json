@@ -1,0 +1,62 @@
+{
+  "name": "china-map-dashboard",
+  "version": "1.0.1",
+  "displayName": {
+    "zh_cn": "中国地图仪表盘",
+    "en_us": "China Map Dashboard"
+  },
+  "description": {
+    "zh_cn": "根据地区负责人机构数量进行颜色标记的中国地图可视化插件",
+    "en_us": "China map visualization plugin with color coding based on regional manager's institution count"
+  },
+  "icon": "https://example.com/icon.png",
+  "type": "dashboard_widget",
+  "permissions": [
+    "user:read",
+    "organization:read",
+    "bitable:app:readonly",
+    "bitable:app:readwrite"
+  ],
+  "scopes": [
+    "dashboard:write",
+    "data:read",
+    "data:write",
+    "bitable:read",
+    "bitable:write"
+  ],
+  "entry": {
+    "desktop": "index.html",
+    "mobile": "index.html"
+  },
+  "config": {
+    "width": 800,
+    "height": 600,
+    "resizable": true,
+    "modal": true,
+    "showConfirmButton": true,
+    "showCancelButton": true,
+    "confirmText": {
+      "zh_cn": "确认",
+      "en_us": "Confirm"
+    },
+    "cancelText": {
+      "zh_cn": "取消", 
+      "en_us": "Cancel"
+    }
+  },
+  "lifecycle": {
+    "onLoad": "initialize",
+    "onConfirm": "handleConfirm",
+    "onCancel": "handleCancel",
+    "onClose": "cleanup"
+  },
+  "author": {
+    "name": "Developer",
+    "email": "1281991939@qq.com"
+  },
+  "homepage": "https://github.com/developer/feishu-china-map-dashboard",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/developer/feishu-china-map-dashboard.git"
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "name": "China Map Dashboard",
+  "description": "China map visualization plugin based on Feishu Bitable",
+  "confirm": "Confirm",
+  "cancel": "Cancel", 
+  "save": "Save",
+  "settings": "Settings",
+  "data_source": "Data Source",
+  "region_config": "Region Config",
+  "loading": "Loading...",
+  "error": "Error",
+  "success": "Success",
+  "total_regions": "Total Regions",
+  "total_institutions": "Total Institutions",
+  "total_managers": "Total Managers", 
+  "active_institutions": "Active Institutions",
+  "config_saved": "Configuration saved",
+  "config_cancelled": "Configuration cancelled",
+  "load_failed": "Load failed",
+  "save_failed": "Save failed, please retry",
+  "feishu_bitable": "Feishu Bitable",
+  "demo_data": "Demo Data"
+}
