@@ -1,0 +1,16 @@
+# 开发文件
+node_modules/
+.DS_Store
+*.log
+.env
+.env.local
+
+# 编辑器文件
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# 临时文件
+*.tmp
+*.temp
