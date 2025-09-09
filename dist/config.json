@@ -1,0 +1,85 @@
+{
+  "fields": [
+    {
+      "key": "dataSource",
+      "label": {
+        "zh_cn": "数据源",
+        "en_us": "Data Source"
+      },
+      "type": "select",
+      "options": [
+        {
+          "label": {
+            "zh_cn": "飞书多维表格",
+            "en_us": "Feishu Bitable"
+          },
+          "value": "bitable"
+        },
+        {
+          "label": {
+            "zh_cn": "演示数据",
+            "en_us": "Demo Data"
+          },
+          "value": "demo"
+        }
+      ],
+      "default": "demo",
+      "required": true
+    },
+    {
+      "key": "colorScheme",
+      "label": {
+        "zh_cn": "颜色方案",
+        "en_us": "Color Scheme"
+      },
+      "type": "select",
+      "options": [
+        {
+          "label": {
+            "zh_cn": "蓝色系",
+            "en_us": "Blue"
+          },
+          "value": "blue"
+        },
+        {
+          "label": {
+            "zh_cn": "绿色系",
+            "en_us": "Green"
+          },
+          "value": "green"
+        },
+        {
+          "label": {
+            "zh_cn": "橙色系",
+            "en_us": "Orange"
+          },
+          "value": "orange"
+        }
+      ],
+      "default": "blue",
+      "required": false
+    },
+    {
+      "key": "showStatistics",
+      "label": {
+        "zh_cn": "显示统计信息",
+        "en_us": "Show Statistics"
+      },
+      "type": "checkbox",
+      "default": true,
+      "required": false
+    },
+    {
+      "key": "autoRefresh",
+      "label": {
+        "zh_cn": "自动刷新间隔（分钟）",
+        "en_us": "Auto Refresh Interval (minutes)"
+      },
+      "type": "number",
+      "default": 5,
+      "min": 1,
+      "max": 60,
+      "required": false
+    }
+  ]
+}

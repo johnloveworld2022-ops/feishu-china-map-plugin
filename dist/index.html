@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="icon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>中国地图仪表盘</title>
+    <meta name="description" content="基于飞书多维表格的中国地图数据可视化插件" />
+    <!-- 飞书插件 SDK -->
+    <script src="https://lf1-cdn-tos.bytegoofy.com/obj/static/lark/sdk/feishu-1.0.0.js"></script>
+    <script type="module" crossorigin src="assets/index-d3d5ec2e.js"></script>
+    <link rel="modulepreload" crossorigin href="assets/vendor-57209f9c.js">
+    <link rel="modulepreload" crossorigin href="assets/echarts-9fe7269c.js">
+    <link rel="stylesheet" href="assets/index-716a45f6.css">
+  </head>
+  <body>
+    <div id="root"></div>
+    
+    <!-- 飞书插件回调处理 -->
+    <script>
+      // 插件生命周期回调
+      window.onFeishuPluginReady = function() {
+        console.log('飞书插件已准备就绪');
+      };
+      
+      window.onFeishuPluginConfig = function(config) {
+        console.log('插件配置更新:', config);
+        // 将配置传递给 React 应用
+        if (window.updatePluginConfig) {
+          window.updatePluginConfig(config);
+        }
+      };
+      
+      window.onFeishuPluginSave = function() {
+        console.log('插件保存回调');
+        // 触发保存逻辑
+        if (window.savePluginData) {
+          return window.savePluginData();
+        }
+        return Promise.resolve();
+      };
+    </script>
+  </body>
+</html>
